@@ -53,8 +53,13 @@ NVInitDma(ScrnInfoPtr pScrn)
 	ret = nouveau_object_new(device, 0, NOUVEAU_FIFO_CHANNEL_CLASS,
 				 data, size, &pNv->channel);
 	if (ret) {
-		xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-			   "Error creating GPU channel: %d\n", ret);
+		if (ret == -ENODEV)
+			xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+				   "'No such device' while creating GPU channel: perhaps you disabled "
+			           "accelleration in your module config but not in your X.Org config\n");
+		else
+			xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+				   "Error creating GPU channel: %d, %s\n", ret, strerror(-ret));
 		return FALSE;
 	}
 
